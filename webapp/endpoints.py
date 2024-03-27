@@ -18,14 +18,19 @@ def report_match_times(
     time_service: TimeService = Depends(Provide[Container.time_service]) 
 ):
     current_timestamp = time_service.get_current_timestamp()
-    current_bit_value = bit_service.get_current_bit(requestBody.end_point)
-    bit_service.save_bit(current_bit_value, current_timestamp, requestBody.source)
+    current_bit_value = bit_service.get_current_bytes(requestBody.end_point)
+    the_bit = bit_service.save_bit(current_bit_value, current_timestamp, requestBody.source)
 
     return ReportInfo(
         channel = requestBody.source,
         time = current_timestamp,
         match_times= []
     )
+
+
+
+
+
 
 
 

@@ -3,7 +3,7 @@
 from dependency_injector import containers, providers
 
 from .database import Database, FirestoreDatabase
-from .repositories import UserRepository
+from .repositories import UserRepository, BitRepository
 from .services import UserService, BitService, TimeService
 
 
@@ -17,6 +17,18 @@ class Container(containers.DeclarativeContainer):
 
     firestore_db = providers.Singleton(FirestoreDatabase)
 
+    bit_repository = providers.Factory(
+        BitRepository,
+        db=firestore_db.provided.client,
+    )
+
+    bit_service = providers.Factory(
+        BitService,
+        bit_repository=bit_repository
+    )
+
+
+
     user_repository = providers.Factory(
         UserRepository,
         session_factory=db.provided.session,
@@ -27,6 +39,6 @@ class Container(containers.DeclarativeContainer):
         user_repository=user_repository,
     )
 
-    bit_service = providers.Factory(BitService)
+    
 
     time_service = providers.Factory(TimeService)

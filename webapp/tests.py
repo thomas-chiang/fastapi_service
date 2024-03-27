@@ -6,10 +6,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from .repositories import UserRepository, UserNotFoundError
-from .models import User
+from .models import User, Bit
 from .application import app
 from .services import BitService, TimeService
-
+from .database import FirestoreDatabase
+from mockfirestore import MockFirestore
+from .repositories import BitRepository
 
 @pytest.fixture
 def client():
@@ -17,7 +19,8 @@ def client():
 
 def test_report_match_times(client):
     request_body = {
-        "source": "sample_channel"
+        "source": "sample_channel",
+        "end_point": "sample_endpoint"
     }
     response = client.post("/report", json=request_body)
     assert response.status_code == 200
@@ -28,15 +31,6 @@ def test_report_match_times(client):
     assert all(isinstance(item, int) for item in data.get('match_times'))
 
 
-@pytest.fixture
-def bit_service():
-    return BitService()
-
-def test_get_current_bit_length(bit_service):
-    result = bit_service.get_current_bit("https://example.com")
-    assert len(result) == 128  # 1024 bits = 128 bytes
-
-
 
 @pytest.fixture
 def time_service():
@@ -45,6 +39,61 @@ def time_service():
 def test_get_current_timestamp(time_service):
     current_timestamp = time_service.get_current_timestamp()
     assert isinstance(current_timestamp, int)
+
+
+
+@pytest.fixture
+def firestore_database():
+    return FirestoreDatabase()
+
+def test_firestore_database(firestore_database):
+    assert isinstance(firestore_database.client, MockFirestore)
+
+
+@pytest.fixture
+def bit_repository(firestore_database):
+    return BitRepository(db = firestore_database.client)
+
+
+@pytest.fixture
+def bit_service(bit_repository):
+    return BitService(bit_repository=bit_repository)
+
+
+def test_get_current_bytes_length(bit_service, time_service):
+    bit_value = bit_service.get_current_bytes("https://example.com")
+    assert len(bit_value) == 128  # 1024 bits = 128 bytes
+
+    the_bit = bit_service.save_bit(
+        bit_value=bit_value, 
+        timestamp=time_service.get_current_timestamp(), 
+        source = "sample_source"
+    )
+
+    assert isinstance(the_bit, Bit)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

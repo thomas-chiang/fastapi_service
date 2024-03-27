@@ -17,13 +17,10 @@ class FirestoreDatabase:
     def __init__(self) -> None:
         if "pytest" in sys.argv[0]:
             # testing db
-            self.db = MockFirestore()
+            self.client = MockFirestore()
         else:
             # not a testing db
-            self.db = firestore.Client()  # pragma: no cover
-
-    def get_client(self) -> firestore.Client:
-        return self.db
+            self.client = firestore.Client()  # pragma: no cover
 
 
 

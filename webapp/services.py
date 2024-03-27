@@ -9,11 +9,18 @@ from .models import User, Bit
 import random
 
 
+class CompareValueService:
+    def __init__(self, compare_value_repository: CompareValueRepository) -> None:
+        self._repository: CompareValueRepository = compare_value_repository
+    
+    
+
+
 class BitService:
     def __init__(self, bit_repository: BitRepository) -> None:
         self._repository: BitRepository = bit_repository
 
-    def get_current_bit(self, endpoint: str) -> bytes:
+    def get_current_bytes(self, endpoint: str) -> bytes:
         """
         TODO: Retrieve the current bit value by making a GET request to the specified endpoint.
         """
@@ -28,6 +35,7 @@ class BitService:
     
     def save_bit(self, bit_value: bytes, timestamp: int, source: str) -> Bit:
         the_bit = Bit(bit_value=bit_value, timestamp=timestamp, source=source)
+        self._repository.add(the_bit)
         return the_bit
 
     
