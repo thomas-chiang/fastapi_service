@@ -4,8 +4,11 @@ from sqlalchemy import Column, String, Boolean, Integer
 
 from .database import Base
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
+
+from uuid import UUID, uuid4
+from datetime import datetime
 
 
 class ReportRequestBody(BaseModel):
@@ -18,6 +21,13 @@ class ReportInfo(BaseModel):
     time: int
     match_times: List[int]
 
+
+class Bit(BaseModel):
+    bit_value: bytes
+    timestamp: int
+    source: str
+    id: UUID = Field(default_factory=uuid4)
+    created_at: datetime = Field(default_factory=datetime.now(datetime.UTC))
 
 
 class User(Base):

@@ -2,7 +2,7 @@
 
 from dependency_injector import containers, providers
 
-from .database import Database
+from .database import Database, FirestoreDatabase
 from .repositories import UserRepository
 from .services import UserService, BitService, TimeService
 
@@ -14,6 +14,8 @@ class Container(containers.DeclarativeContainer):
     config = providers.Configuration(yaml_files=["config.yml"])
 
     db = providers.Singleton(Database, db_url=config.db.url)
+
+    firestore_db = providers.Singleton(FirestoreDatabase)
 
     user_repository = providers.Factory(
         UserRepository,

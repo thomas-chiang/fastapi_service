@@ -5,7 +5,24 @@ from typing import Callable, Iterator
 
 from sqlalchemy.orm import Session
 
-from .models import User
+from .models import User, Bit
+from google.cloud import firestore
+import base64
+
+
+class BitRepository:
+    collection_name = "bits"
+
+    def __init__(self, db: firestore.Client) -> None:
+        self.db = db
+
+    def add(self, bit: Bit) -> None:
+        data = bit.model_dump()
+        data["id"] = str(data["id"])
+        data["bit_value"] = base64.b64encode(data["bit_value"]).decode('utf-8')
+        doc_ref = self.db.collection(self.collection_name).document(data["id"])
+        doc_ref.set(data)
+
 
 
 class UserRepository:

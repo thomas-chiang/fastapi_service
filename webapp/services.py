@@ -3,13 +3,16 @@
 from uuid import uuid4
 from typing import Iterator
 
-from .repositories import UserRepository
+from .repositories import UserRepository, BitRepository
 
-from .models import User
+from .models import User, Bit
 import random
 
 
 class BitService:
+    def __init__(self, bit_repository: BitRepository) -> None:
+        self._repository: BitRepository = bit_repository
+
     def get_current_bit(self, endpoint: str) -> bytes:
         """
         TODO: Retrieve the current bit value by making a GET request to the specified endpoint.
@@ -23,8 +26,9 @@ class BitService:
             byte_array.append(byte)
         return bytes(byte_array)
     
-    def save_bit(self, bit_value: bytes, timestamp: int, source: str) -> None:
-        pass
+    def save_bit(self, bit_value: bytes, timestamp: int, source: str) -> Bit:
+        the_bit = Bit(bit_value=bit_value, timestamp=timestamp, source=source)
+        return the_bit
 
     
 

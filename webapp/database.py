@@ -8,6 +8,25 @@ from sqlalchemy import create_engine, orm
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
+
+import sys
+from google.cloud import firestore
+from mockfirestore import MockFirestore  # Assuming this module exists
+
+class FirestoreDatabase:
+    def __init__(self) -> None:
+        if "pytest" in sys.argv[0]:
+            # testing db
+            self.db = MockFirestore()
+        else:
+            # not a testing db
+            self.db = firestore.Client()  # pragma: no cover
+
+    def get_client(self) -> firestore.Client:
+        return self.db
+
+
+
 logger = logging.getLogger(__name__)
 
 Base = declarative_base()
