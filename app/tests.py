@@ -9,46 +9,43 @@ from .repositories import UserRepository, UserNotFoundError
 from .models import User, Bit
 from .application import app
 from .services import BitService, TimeService, get_random_1024_bit_value
-from .database import FirestoreDatabase
 from mockfirestore import MockFirestore
 from .repositories import BitRepository
 
-from httpx import AsyncClient
-
+from fakeredis import FakeAsyncRedis
 
 @pytest.fixture
 def client():
     yield TestClient(app)
-
-# @pytest.fixture
-# async def client():
-#     async with AsyncClient(app=app, base_url="http://test") as client:
-#         yield client
-
 
 @pytest.fixture
 def time_service():
     return TimeService()
 
 @pytest.fixture
-def firestore_database():
-    return FirestoreDatabase()
+def redis():
+    return FakeAsyncRedis()
 
 @pytest.fixture
-def bit_repository(firestore_database):
-    return BitRepository(db = firestore_database.client)
+def bit_repository(redis):
+    return BitRepository(redis = redis)
 
 @pytest.fixture
 def bit_service(bit_repository):
     return BitService(bit_repository=bit_repository)
 
-def test_report_match_times(client):
+
+
+
+
+
+def test_report_match_times(client, bit_repository):
     request_body = {
         "source": "sample_channel",
         "end_point": "sample_endpoint"
     }
-    response = client.post("/report", json=request_body)
-    print("*"*1000, response)
+    with app.container.bit_repository.override(bit_repository):
+        response = client.post("/report", json=request_body)
     assert response.status_code == 200
     data = response.json()
     assert data.get('channel') == "sample_channel"
@@ -56,40 +53,38 @@ def test_report_match_times(client):
     assert isinstance(data.get('match_times'), list)
     assert all(isinstance(item, int) for item in data.get('match_times'))
 
+
 @pytest.mark.asyncio
 async def test_time_service(time_service: TimeService):
     current_timestamp = await time_service.get_current_timestamp()
     assert isinstance(current_timestamp, int)
 
-def test_firestore_database(firestore_database):
-    assert isinstance(firestore_database.client, MockFirestore)
 
 @pytest.mark.asyncio
-async def test_bit_repository(bit_repository, time_service, ):
+async def test_bit_repository(bit_repository: BitRepository, time_service: TimeService):
     the_bit_value = get_random_1024_bit_value()
     the_timestamp = await time_service.get_current_timestamp()
     the_source = "sample_source"
 
     bit_1 = Bit(bit_value=the_bit_value, timestamp=the_timestamp, source=the_source)
-    bit_2 = Bit(bit_value=the_bit_value, timestamp=the_timestamp, source=the_source)
-    bit_repository.add(bit_1)
-    bit_repository.add(bit_2)
-    the_bits = bit_repository.get_bits_by_timestamp_and_source(the_timestamp, the_source)
-    assert len(the_bits) == 2
+    await bit_repository.add(bit_1)
+    the_bit = await bit_repository.get_bit_by_timestamp_and_source(the_timestamp, the_source)
+    assert bit_1 == the_bit
 
 
-def test_get_bit_service(bit_service: BitService):
-    the_bit_value = bit_service.get_current_bytes(endpoint="https://example.com")
+@pytest.mark.asyncio
+async def test_get_bit_service(bit_service: BitService):
+    the_bit_value = await bit_service.get_current_bytes(endpoint="https://example.com")
     the_timestamp = 1
     the_source = "sample_source"
 
-    previous_bit = bit_service.save_bit(
+    previous_bit = await bit_service.save_bit(
         bit_value=the_bit_value, 
         timestamp=the_timestamp, 
         source = the_source
     )
 
-    current_bit = bit_service.save_bit(
+    current_bit = await bit_service.save_bit(
         bit_value=the_bit_value, 
         timestamp=the_timestamp + 1, 
         source = the_source
@@ -97,11 +92,9 @@ def test_get_bit_service(bit_service: BitService):
 
     assert len(the_bit_value) == 128  # 1024 bits = 128 bytes
     assert isinstance(current_bit, Bit)
-    assert not bit_service.previous_bit_exists(previous_bit)
-    assert bit_service.previous_bit_exists(current_bit)
-    print(previous_bit)
-    print(bit_service.get_previous_bit(current_bit))
-    assert previous_bit == bit_service.get_previous_bit(current_bit)
+    assert not await bit_service.previous_bit_exists(previous_bit)
+    assert await bit_service.previous_bit_exists(current_bit)
+    assert previous_bit == await bit_service.get_previous_bit(current_bit)
 
 
 

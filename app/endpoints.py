@@ -17,17 +17,13 @@ async def report_match_times(
     bit_service: BitService = Depends(Provide[Container.bit_service]), 
     time_service: TimeService = Depends(Provide[Container.time_service]) 
 ):
-    end_point, source = requestBody.end_point, requestBody.source
 
     current_timestamp = await time_service.get_current_timestamp()
-    current_bit_value = bit_service.get_current_bytes(end_point)
+    current_bit_value = await bit_service.get_current_bytes(requestBody.end_point)
     
-    current_bit = bit_service.save_bit(current_bit_value, current_timestamp, source)
-    if bit_service.previous_bit_exists(current_bit):
-        previous_bit = bit_service.get_previous_bit(current_bit)
-
-
-
+    current_bit = await bit_service.save_bit(current_bit_value, current_timestamp, requestBody.source)
+    if await bit_service.previous_bit_exists(current_bit):
+        previous_bit = await bit_service.get_previous_bit(current_bit)
 
     return ReportInfo(
         channel = requestBody.source,

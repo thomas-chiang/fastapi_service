@@ -26,7 +26,6 @@ class Bit(BaseModel):
     bit_value: bytes
     timestamp: int
     source: str
-    id: UUID = Field(default_factory=uuid4)
 
 
 class User(Base):

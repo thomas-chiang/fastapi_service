@@ -3,7 +3,7 @@
 from uuid import uuid4
 from typing import Iterator
 
-from .repositories import UserRepository, BitRepository
+from .repositories import UserRepository, BitRepository, BitNotFoundError
 
 from .models import User, Bit
 import random
@@ -32,27 +32,30 @@ class BitService:
     def __init__(self, bit_repository: BitRepository) -> None:
         self._repository: BitRepository = bit_repository
 
-    def get_current_bytes(self, endpoint: str) -> bytes:
+    async def get_current_bytes(self, endpoint: str) -> bytes:
         """
         TODO: Retrieve the current bit value by making a GET request to the specified endpoint.
         """
-        return get_random_1024_bit_value()
-        
+        return await asyncio.to_thread(get_random_1024_bit_value)        
     
-    def save_bit(self, bit_value: bytes, timestamp: int, source: str) -> Bit:
+    async def save_bit(self, bit_value: bytes, timestamp: int, source: str) -> Bit:
         the_bit = Bit(bit_value=bit_value, timestamp=timestamp, source=source)
-        self._repository.add(the_bit)
+        await self._repository.add(the_bit)
         return the_bit
     
-    def previous_bit_exists(self, current_bit: Bit) -> bool:
+    async def previous_bit_exists(self, current_bit: Bit) -> bool:
         previous_timestamp = current_bit.timestamp - BitService.timestamp_interval
         source = current_bit.source
-        return True if len(self._repository.get_bits_by_timestamp_and_source(previous_timestamp, source)) == 1 else False
+        try:
+            await self._repository.get_bit_by_timestamp_and_source(previous_timestamp, source)
+        except BitNotFoundError:
+            return False
+        return True
         
-    def get_previous_bit(self, current_bit: Bit) -> Bit:
+    async def get_previous_bit(self, current_bit: Bit) -> Bit:
         previous_timestamp = current_bit.timestamp - BitService.timestamp_interval
         source = current_bit.source
-        return self._repository.get_bits_by_timestamp_and_source(previous_timestamp, source)[0]
+        return await self._repository.get_bit_by_timestamp_and_source(previous_timestamp, source)
     
 
 

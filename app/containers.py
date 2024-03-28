@@ -2,7 +2,7 @@
 
 from dependency_injector import containers, providers
 
-from .database import Database, FirestoreDatabase, init_redis_pool
+from .database import Database, init_redis_pool
 from .repositories import UserRepository, BitRepository
 from .services import UserService, BitService, TimeService
 
@@ -19,15 +19,9 @@ class Container(containers.DeclarativeContainer):
         password=config.redis_password,
     )
 
-    db = providers.Singleton(Database, db_url=config.db.url)
-
-    firestore_db = providers.Singleton(FirestoreDatabase)
-
-
-
     bit_repository = providers.Factory(
         BitRepository,
-        db=firestore_db.provided.client,
+        redis=redis_pool
     )
 
     bit_service = providers.Factory(
@@ -40,6 +34,7 @@ class Container(containers.DeclarativeContainer):
 
 
 
+    db = providers.Singleton(Database, db_url=config.db.url)
 
     user_repository = providers.Factory(
         UserRepository,

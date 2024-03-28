@@ -19,7 +19,6 @@ from aioredis import from_url, Redis
 
 
 async def init_redis_pool(host: str, password: str) -> AsyncIterator[Redis]:
-    print(host, password)
     session = from_url(f"redis://{host}", password=password, encoding="utf-8", decode_responses=True)
     yield session
     session.close()
@@ -27,22 +26,11 @@ async def init_redis_pool(host: str, password: str) -> AsyncIterator[Redis]:
 
 
 
-class FirestoreDatabase:
-    def __init__(self) -> None:
-        if "pytest" in sys.argv[0]:
-            # testing db
-            self.client = MockFirestore()
-        else:
-            # not a testing db
-            self.client = firestore.Client()  # pragma: no cover
 
 
 
 logger = logging.getLogger(__name__)
-
 Base = declarative_base()
-
-
 class Database:
 
     def __init__(self, db_url: str) -> None:
