@@ -12,14 +12,14 @@ router = APIRouter()
 
 @router.post("/report")
 @inject
-def report_match_times(
+async def report_match_times(
     requestBody: ReportRequestBody,
     bit_service: BitService = Depends(Provide[Container.bit_service]), 
     time_service: TimeService = Depends(Provide[Container.time_service]) 
 ):
     end_point, source = requestBody.end_point, requestBody.source
 
-    current_timestamp = time_service.get_current_timestamp()
+    current_timestamp = await time_service.get_current_timestamp()
     current_bit_value = bit_service.get_current_bytes(end_point)
     
     current_bit = bit_service.save_bit(current_bit_value, current_timestamp, source)

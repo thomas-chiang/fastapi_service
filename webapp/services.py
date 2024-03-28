@@ -8,7 +8,7 @@ from .repositories import UserRepository, BitRepository
 from .models import User, Bit
 import random
 import time
-
+import asyncio
 
 # class CompareValueService:
 #     def __init__(self, compare_value_repository: CompareValueRepository) -> None:
@@ -63,8 +63,8 @@ class BitService:
 
 class TimeService:
     @staticmethod
-    def get_current_timestamp() -> int:
-        return int(time.time())
+    async def get_current_timestamp() -> int:
+        return int(await asyncio.to_thread(time.time))
 
 
 

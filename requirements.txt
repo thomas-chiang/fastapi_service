@@ -9,3 +9,4 @@ pytest-cov
 httpx
 google-cloud-firestore
 mock-firestore
+pytest-asyncio
