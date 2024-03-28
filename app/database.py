@@ -13,6 +13,20 @@ import sys
 from google.cloud import firestore
 from mockfirestore import MockFirestore  # Assuming this module exists
 
+
+from typing import AsyncIterator
+from aioredis import from_url, Redis
+
+
+async def init_redis_pool(host: str, password: str) -> AsyncIterator[Redis]:
+    print(host, password)
+    session = from_url(f"redis://{host}", password=password, encoding="utf-8", decode_responses=True)
+    yield session
+    session.close()
+    await session.wait_closed()
+
+
+
 class FirestoreDatabase:
     def __init__(self) -> None:
         if "pytest" in sys.argv[0]:
