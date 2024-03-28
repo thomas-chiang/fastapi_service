@@ -27,7 +27,6 @@ class Bit(BaseModel):
     timestamp: int
     source: str
     id: UUID = Field(default_factory=uuid4)
-    created_at: datetime = Field(default_factory=datetime.now)
 
 
 class User(Base):

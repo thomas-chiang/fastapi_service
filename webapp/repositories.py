@@ -1,5 +1,5 @@
 """Repositories module."""
-
+from typing import List
 from contextlib import AbstractContextManager
 from typing import Callable, Iterator
 
@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 
 from .models import User, Bit
 from google.cloud import firestore
+from google.cloud.firestore_v1.base_query import FieldFilter
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
 import base64
 
 
@@ -16,12 +18,29 @@ class BitRepository:
     def __init__(self, db: firestore.Client) -> None:
         self.db = db
 
+    def doc_snapshot_to_bit(self, doc_snapshot: DocumentSnapshot) -> Bit:
+        doc = doc_snapshot.to_dict()
+        doc["bit_value"] =  base64.b64decode(doc["bit_value"])
+        return Bit(**doc)
+
     def add(self, bit: Bit) -> None:
         data = bit.model_dump()
         data["id"] = str(data["id"])
         data["bit_value"] = base64.b64encode(data["bit_value"]).decode('utf-8')
         doc_ref = self.db.collection(self.collection_name).document(data["id"])
         doc_ref.set(data)
+    
+    def get_bits_by_timestamp_and_source(self, timestamp: int, source: str) -> List[Bit]:
+        query = (
+            self.db.collection(self.collection_name)
+            .where("timestamp", "==", timestamp)
+            .where("source", "==", source)
+            .stream()
+        )
+        return [self.doc_snapshot_to_bit(doc_snapshot) for doc_snapshot in query]
+
+            
+
 
 
 
