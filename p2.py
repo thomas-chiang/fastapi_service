@@ -27,11 +27,11 @@ async def check_first_n_bits_equal(current: bitarray, previous: bitarray, first_
     )
     return False if found_diff else True
 
-def compute_score_by_idx(sum_ref: list, current: bitarray, previous: bitarray, numerator: int, denominator: int, idx: int) -> float:
+def compute_score_by_idx(sum_ref: list, current: bitarray, previous: bitarray, numerator: int, denominator: int, idx: int):
     if current[idx] == previous[idx]:
         sum_ref[0] += numerator / denominator
 
-async def compute_score_for_remaining_bit(current: bitarray, previous: bitarray, first_n: int):
+async def compute_score_for_remaining_bit(current: bitarray, previous: bitarray, first_n: int) -> float:
     sum_ref = [0]
     await asyncio.gather(   
         *(asyncio.to_thread(compute_score_by_idx, sum_ref, current, previous, len(current)-idx+first_n, len(current), idx) for idx in range(first_n, len(current)))
@@ -42,12 +42,19 @@ async def compute_score_for_remaining_bit(current: bitarray, previous: bitarray,
 
     return sum_ref[0]
 
-async def compute_score(current: bitarray, previous: bitarray, first_n: int):
-    is_equal, score = await asyncio.gather(   )
+async def compute_score(current: bitarray, previous: bitarray, first_n: int) -> float:
+    is_equal, score = await asyncio.gather( 
+        check_first_n_bits_equal(current, previous, first_n),
+        compute_score_for_remaining_bit(current, previous, first_n)
+    )
+
+    return score if is_equal else 0
 
 res = asyncio.run(compute_score_for_remaining_bit(bitarray128, bitarray128, 256))
 print(res)
 s = sum(((1024-i) /1024 for i in range(768)))
+print(s)
+res = asyncio.run(compute_score(bitarray128, bitarray128, 256))
 print(s)
 
 res = asyncio.run(check_first_n_bits_equal(c, p, 7))
