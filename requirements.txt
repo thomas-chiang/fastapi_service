@@ -2,12 +2,13 @@ dependency-injector
 fastapi
 uvicorn
 pyyaml
+
+
 sqlalchemy
 pytest
 requests
 pytest-cov
 httpx
-google-cloud-firestore
-mock-firestore
 pytest-asyncio
 aioredis
+fakeredis

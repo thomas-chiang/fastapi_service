@@ -23,7 +23,7 @@ class ReportInfo(BaseModel):
 
 
 class Bit(BaseModel):
-    bit_value: bytes
+    bytes: bytes
     timestamp: int
     source: str
 

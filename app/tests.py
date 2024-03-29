@@ -8,9 +8,8 @@ from fastapi.testclient import TestClient
 from .repositories import UserRepository, UserNotFoundError
 from .models import User, Bit
 from .application import app
-from .services import BitService, TimeService, get_random_1024_bit_value
-from mockfirestore import MockFirestore
-from .repositories import BitRepository
+from .services import BitService, TimeService, get_random_1024_bytes, ComparisonBitService
+from .repositories import BitRepository, ComparisonBitRepository
 
 from fakeredis import FakeAsyncRedis
 
@@ -31,10 +30,16 @@ def bit_repository(redis):
     return BitRepository(redis = redis)
 
 @pytest.fixture
+def comparison_bit_repository(redis):
+    return ComparisonBitRepository(redis = redis)
+
+@pytest.fixture
 def bit_service(bit_repository):
     return BitService(bit_repository=bit_repository)
 
-
+@pytest.fixture
+def comparison_bit_service(comparison_bit_repository):
+    return ComparisonBitService(comparison_bit_repository=comparison_bit_repository)
 
 
 
@@ -62,45 +67,70 @@ async def test_time_service(time_service: TimeService):
 
 @pytest.mark.asyncio
 async def test_bit_repository(bit_repository: BitRepository, time_service: TimeService):
-    the_bit_value = get_random_1024_bit_value()
+    the_bytes = get_random_1024_bytes()
     the_timestamp = await time_service.get_current_timestamp()
     the_source = "sample_source"
 
-    bit_1 = Bit(bit_value=the_bit_value, timestamp=the_timestamp, source=the_source)
+    bit_1 = Bit(bytes=the_bytes, timestamp=the_timestamp, source=the_source)
     await bit_repository.add(bit_1)
     the_bit = await bit_repository.get_bit_by_timestamp_and_source(the_timestamp, the_source)
     assert bit_1 == the_bit
 
 
 @pytest.mark.asyncio
-async def test_get_bit_service(bit_service: BitService):
-    the_bit_value = await bit_service.get_current_bytes(endpoint="https://example.com")
+async def test_comparison_bit_repository(comparison_bit_repository: ComparisonBitRepository, time_service: TimeService):
+    the_bytes = get_random_1024_bytes()
+    the_timestamp = await time_service.get_current_timestamp()
+    the_source = "sample_source"
+
+    bit_1 = Bit(bytes=the_bytes, timestamp=the_timestamp, source=the_source)
+    await comparison_bit_repository.add(bit_1)
+    the_bit = await comparison_bit_repository.get_bit_by_timestamp_and_source(the_timestamp, the_source)
+    assert bit_1 == the_bit
+
+
+@pytest.mark.asyncio
+async def test_bit_service(bit_service: BitService):
+    the_bytes = await bit_service.get_current_bytes(endpoint="https://example.com")
     the_timestamp = 1
     the_source = "sample_source"
 
     previous_bit = await bit_service.save_bit(
-        bit_value=the_bit_value, 
+        bytes=the_bytes, 
         timestamp=the_timestamp, 
         source = the_source
     )
 
     current_bit = await bit_service.save_bit(
-        bit_value=the_bit_value, 
+        bytes=the_bytes, 
         timestamp=the_timestamp + 1, 
         source = the_source
     )
 
-    assert len(the_bit_value) == 128  # 1024 bits = 128 bytes
+    assert len(the_bytes) == 128  # 1024 bits = 128 bytes
     assert isinstance(current_bit, Bit)
     assert not await bit_service.previous_bit_exists(previous_bit)
     assert await bit_service.previous_bit_exists(current_bit)
     assert previous_bit == await bit_service.get_previous_bit(current_bit)
 
 
+@pytest.mark.asyncio
+async def test_comparison_bit_service(comparison_bit_service: ComparisonBitService, redis: FakeAsyncRedis):
 
+    """
+    test compute_comparison_value
+    """
+    integer_one_as_byte = int(1).to_bytes(1, byteorder='big')
+    integer_zero_as_byte = int(0).to_bytes(1, byteorder='big')
+    previous_bit = Bit(bytes=integer_one_as_byte, timestamp=1, source="s1")
+    current_bit = Bit(bytes=integer_zero_as_byte, timestamp=1, source="s1")
+    result_bytes = await comparison_bit_service.compute_comparison_value(previous_bit, current_bit)
+    assert integer_one_as_byte == result_bytes
 
-
-
+    previous_comparison_bit = await comparison_bit_service.save_bit(bytes=bytes(), timestamp=1, source="s2")
+    current_comparison_bit = await comparison_bit_service.save_bit(bytes=bytes(), timestamp=1 + 60*60*24, source="s2")
+    assert await comparison_bit_service.previous_bit_exists(current_comparison_bit)
+    assert previous_comparison_bit == await comparison_bit_service.get_previous_bit(current_comparison_bit)
 
 
 

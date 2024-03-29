@@ -9,29 +9,35 @@ from .models import User, Bit
 
 from aioredis import Redis
 
+
+
 class BitRepository:
     expiration_seconds = 172800 # 2 days
+    entity_name = "Bit"
 
     def __init__(self, redis: Redis) -> None:
         self._redis = redis
 
     async def add(self, bit: Bit) -> None:
-        await self._redis.setex(str(bit.timestamp)+bit.source, self.expiration_seconds ,bit.bit_value)
+        await self._redis.setex(name=self.entity_name + str(bit.timestamp) + bit.source, time=self.expiration_seconds ,value=bit.bytes)
     
     async def get_bit_by_timestamp_and_source(self, timestamp: int, source: str) -> Bit:
-        bit_value = await self._redis.get(str(timestamp)+source)
-        if not bit_value:
-            raise BitNotFoundError({'timestamp': timestamp, 'source': source})
-        return Bit(bit_value=bit_value, source=source, timestamp=timestamp)
+        bytes = await self._redis.get(self.entity_name +str(timestamp)+source)
+        if bytes == None:
+            raise NotFoundError({'entity_name':self.entity_name, 'timestamp': timestamp, 'source': source})
+        return Bit(bytes=bytes, source=source, timestamp=timestamp)
+
+
+class ComparisonBitRepository(BitRepository):
+    expiration_seconds = 60 * 60 * 24 *2 # 2 days
+    entity_name = "ComparisonBit"
+
 
 class NotFoundError(Exception):
     entity_name: str
     def __init__(self, entity_data):
-        super().__init__(f"{self.entity_name} not found, from {entity_data}")
+        super().__init__(f"entity not found, from {entity_data}")
 
-
-class BitNotFoundError(NotFoundError):
-    entity_name: str = "Bit"
 
             
 
