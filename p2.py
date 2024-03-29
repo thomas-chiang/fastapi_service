@@ -1,0 +1,48 @@
+import asyncio
+from bitarray import bitarray
+from app.services import get_random_bytes_of_length_128
+
+
+def bytes_to_bitarray(byte_string: bytes) -> bitarray:
+    bits = bitarray()
+    bits.frombytes(byte_string)
+    return bits
+
+bitarray128 = bytes_to_bitarray(get_random_bytes_of_length_128())
+
+
+c = bitarray('1111000')
+p = bitarray('1111111')
+
+def bit_equal_by_idx(found_diff: bitarray, current: bitarray, previous: bitarray, idx: int) -> None:
+        if found_diff:
+            return
+        if current[idx] != previous[idx]:
+            found_diff.append(1)
+
+async def check_first_n_bits_equal(current: bitarray, previous: bitarray, first_n: str) -> bool:
+    found_diff = bitarray()
+    await asyncio.gather(   
+        *(asyncio.to_thread(bit_equal_by_idx, found_diff, current, previous, idx) for idx in range(first_n))
+    )
+    return False if found_diff else True
+
+def compute_score_by_idx(sum_ref: list, current: bitarray, previous: bitarray, numerator: int, denominator: int, idx: int) -> float:
+    if current[idx] == previous[idx]:
+        sum_ref[0] += numerator / denominator
+
+async def compute_score_for_remaining_bit(current: bitarray, previous: bitarray, first_n: int):
+    sum_ref = [0]
+    # await asyncio.gather(   
+    #     *(asyncio.to_thread(compute_score_by_idx, sum_ref, current, previous, len(current)-idx+first_n, len(current), ) for idx in range(first_n, len(current)))
+    # )
+    await asyncio.gather(   
+        *(asyncio.to_thread(compute_score_by_idx, sum_ref, current, previous, 1, 1, idx) for idx in range(first_n, len(current)))
+    )
+
+    return sum_ref[0]
+
+    
+
+res = asyncio.run(check_first_n_bits_equal(c, p, 7))
+print(res)

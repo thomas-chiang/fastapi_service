@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from .repositories import UserRepository, UserNotFoundError
 from .models import User, Bit
 from .application import app
-from .services import BitService, TimeService, get_random_1024_bytes, ComparisonBitService
+from .services import BitService, TimeService, get_random_bytes_of_length_128, ComparisonBitService
 from .repositories import BitRepository, ComparisonBitRepository
 
 from fakeredis import FakeAsyncRedis
@@ -24,6 +24,19 @@ def time_service():
 @pytest.fixture
 def redis():
     return FakeAsyncRedis()
+
+# @pytest.mark.asyncio
+# async def test_bitarray(redis: FakeAsyncRedis):
+#     from bitarray import bitarray
+#     the_bytes = get_random_bytes_of_length_128()
+#     the_bitarray = bitarray()
+#     the_bitarray.frombytes(the_bytes)
+#     print("*"*100, the_bitarray)
+#     await redis.set("key", the_bitarray)
+#     res = await redis.get("key")
+#     print(res)
+#     print(type(res))
+
 
 @pytest.fixture
 def bit_repository(redis):
@@ -67,7 +80,7 @@ async def test_time_service(time_service: TimeService):
 
 @pytest.mark.asyncio
 async def test_bit_repository(bit_repository: BitRepository, time_service: TimeService):
-    the_bytes = get_random_1024_bytes()
+    the_bytes = get_random_bytes_of_length_128()
     the_timestamp = await time_service.get_current_timestamp()
     the_source = "sample_source"
 
@@ -79,7 +92,7 @@ async def test_bit_repository(bit_repository: BitRepository, time_service: TimeS
 
 @pytest.mark.asyncio
 async def test_comparison_bit_repository(comparison_bit_repository: ComparisonBitRepository, time_service: TimeService):
-    the_bytes = get_random_1024_bytes()
+    the_bytes = get_random_bytes_of_length_128()
     the_timestamp = await time_service.get_current_timestamp()
     the_source = "sample_source"
 
@@ -120,8 +133,8 @@ async def test_comparison_bit_service(comparison_bit_service: ComparisonBitServi
     """
     test compute_comparison_value
     """
-    integer_one_as_byte = int(1).to_bytes(1, byteorder='big')
-    integer_zero_as_byte = int(0).to_bytes(1, byteorder='big')
+    integer_one_as_byte = int(1).to_bytes(128, byteorder='big')
+    integer_zero_as_byte = int(0).to_bytes(128, byteorder='big')
     previous_bit = Bit(bytes=integer_one_as_byte, timestamp=1, source="s1")
     current_bit = Bit(bytes=integer_zero_as_byte, timestamp=1, source="s1")
     result_bytes = await comparison_bit_service.compute_comparison_value(previous_bit, current_bit)

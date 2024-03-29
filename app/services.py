@@ -10,26 +10,34 @@ import random
 import time
 import asyncio
 
-# class CompareValueService:
-#     def __init__(self, compare_value_repository: CompareValueRepository) -> None:
-#         self._repository: CompareValueRepository = compare_value_repository
+import secrets
+from bitarray import bitarray
 
+def get_random_bytes_of_length_128() -> bytes:
+    return secrets.token_bytes(128)
 
-def get_random_1024_bytes() -> bytes:
-    bits = [random.randint(0, 1) for _ in range(1024)]
-    byte_array = bytearray()
-    for i in range(0, 1024, 8):
-        byte = 0
-        for j in range(8):
-            byte |= bits[i + j] << (7 - j)
-        byte_array.append(byte)
-    return bytes(byte_array)
 
 def xor_bytes(byte1: bytes, byte2: bytes) -> bytes:
-    return bytes([b1 ^ b2 for b1, b2 in zip(byte1, byte2)])
+    bit_array1 = bitarray()
+    bit_array1.frombytes(byte1)
+    bit_array2 = bitarray()
+    bit_array2.frombytes(byte2)
+    return (bit_array1 ^ bit_array2).tobytes()
 
 
+def bit_equal_by_idx(ref: bitarray, current: bitarray, previous: bitarray, idx: int) -> None:
+        if ref:
+            return
+        if current[idx] != previous[idx]:
+            ref.append(1)
 
+async def check_first_bits_equal(current: bitarray, previous: bitarray, first_n: str) -> bool:
+    ref = bitarray()
+    await asyncio.gather(   
+        asyncio.to_thread(bit_equal_by_idx, ref, current, previous, idx)
+        for idx in range(first_n)
+    )
+    return False if ref else True
 
 class BitService:
     timestamp_interval = 1 # one second
@@ -39,7 +47,7 @@ class BitService:
         """
         TODO: Retrieve the current bit value by making a GET request to the specified endpoint.
         """
-        return await asyncio.to_thread(get_random_1024_bytes) 
+        return await asyncio.to_thread(get_random_bytes_of_length_128) 
 
     def __init__(self, bit_repository: BitRepository) -> None:
         self._repository: BitRepository = bit_repository       

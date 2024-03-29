@@ -12,3 +12,5 @@ httpx
 pytest-asyncio
 aioredis
 fakeredis
+
+bitarray
