@@ -33,16 +33,22 @@ def compute_score_by_idx(sum_ref: list, current: bitarray, previous: bitarray, n
 
 async def compute_score_for_remaining_bit(current: bitarray, previous: bitarray, first_n: int):
     sum_ref = [0]
-    # await asyncio.gather(   
-    #     *(asyncio.to_thread(compute_score_by_idx, sum_ref, current, previous, len(current)-idx+first_n, len(current), ) for idx in range(first_n, len(current)))
-    # )
     await asyncio.gather(   
-        *(asyncio.to_thread(compute_score_by_idx, sum_ref, current, previous, 1, 1, idx) for idx in range(first_n, len(current)))
+        *(asyncio.to_thread(compute_score_by_idx, sum_ref, current, previous, len(current)-idx+first_n, len(current), idx) for idx in range(first_n, len(current)))
     )
+    # await asyncio.gather(   
+    #     *(asyncio.to_thread(compute_score_by_idx, sum_ref, current, previous, 1, 1, idx) for idx in range(first_n, len(current)))
+    # )
 
     return sum_ref[0]
 
-    
+async def compute_score(current: bitarray, previous: bitarray, first_n: int):
+    is_equal, score = await asyncio.gather(   )
+
+res = asyncio.run(compute_score_for_remaining_bit(bitarray128, bitarray128, 256))
+print(res)
+s = sum(((1024-i) /1024 for i in range(768)))
+print(s)
 
 res = asyncio.run(check_first_n_bits_equal(c, p, 7))
 print(res)
