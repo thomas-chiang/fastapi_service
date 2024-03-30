@@ -3,8 +3,8 @@
 from dependency_injector import containers, providers
 
 from .database import Database, init_redis_pool
-from .repositories import UserRepository, BitRepository, ComparisonBitRepository
-from .services import UserService, BitService, TimeService, ComparisonBitService
+from .repositories import UserRepository, BitRepository, ComparisonBitRepository, ScoreRepository
+from .services import UserService, BitService, TimeService, ComparisonBitService, ScoreService
 
 
 class Container(containers.DeclarativeContainer):
@@ -28,6 +28,11 @@ class Container(containers.DeclarativeContainer):
         ComparisonBitRepository,
         redis=redis_pool
     )
+    
+    score_repository = providers.Factory(
+        ScoreRepository,
+        redis=redis_pool
+    )
 
     bit_service = providers.Factory(
         BitService,
@@ -39,6 +44,10 @@ class Container(containers.DeclarativeContainer):
         comparison_bit_repository=comparison_bit_repository
     )
 
+    score_service = providers.Factory(
+        ScoreService,
+        score_repository=score_repository
+    )
 
 
 

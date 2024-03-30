@@ -2,10 +2,29 @@ version: "3.7"
 
 services:
 
-  webapp:
-    build: ./
-    image: webapp
+  app:
+    build: .
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PASSWORD: "password"
     ports:
       - "8000:8000"
     volumes:
       - "./:/code"
+    depends_on:
+      - "redis"
+      - firestore_emulator
+
+  redis:
+    image: redis
+    command: ["redis-server",  "--requirepass", "password"]
+    ports:
+      - "6379:6379"
+
+  firestore_emulator:
+    image: mtlynch/firestore-emulator
+    environment:
+      - FIRESTORE_PROJECT_ID=dummy-project-id
+      - PORT=8200
+    ports:
+      - 8200:8200

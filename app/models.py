@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 
 class ReportRequestBody(BaseModel):
     source: str
-    end_point: str
+    url: str
 
 
 class ReportInfo(BaseModel):
@@ -24,6 +24,12 @@ class ReportInfo(BaseModel):
 
 class Bit(BaseModel):
     bytes: bytes
+    timestamp: int
+    source: str
+
+
+class Score(BaseModel):
+    score: float
     timestamp: int
     source: str
 
