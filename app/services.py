@@ -107,7 +107,7 @@ class BitService:
 
 
 class ComparisonBitService(BitService):
-    timestamp_interval = 1 #60 * 60 * 24  # total seconds of one day
+    timestamp_interval = 60 * 60 * 24  # total seconds of one day
 
     @staticmethod
     async def compute_comparison_value(current_bit: Bit, previous_bit: Bit) -> bytes:

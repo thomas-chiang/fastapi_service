@@ -15,6 +15,7 @@ class ReportRequestBody(BaseModel):
     source: str
     url: str
     threshold: float
+    report_url: str
 
 
 class ReportInfo(BaseModel):

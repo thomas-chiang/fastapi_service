@@ -48,6 +48,8 @@ class Container(containers.DeclarativeContainer):
 
     time_service = providers.Factory(TimeService)
 
+    external_request_service = providers.Factory(ExternalRequestService)
+
     bit_service = providers.Factory(
         BitService,
         bit_repository=bit_repository
