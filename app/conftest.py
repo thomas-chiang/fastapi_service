@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from mockfirestore import AsyncMockFirestore
 
 from app.repositories import  BitRepository,  PiNotationScoreRepository
-from app.service.external_info_service import ExternalInfoService
+from app.service.external_request_service import ExternalRequestService
 
 from fakeredis import FakeAsyncRedis
 
@@ -39,5 +39,5 @@ def pi_notation_score_repository(firestore_db):
     return PiNotationScoreRepository(firestore_db = firestore_db)
 
 @pytest.fixture(scope="session")
-def external_info_service():
-    return ExternalInfoService()
+def external_request_service():
+    return ExternalRequestService()

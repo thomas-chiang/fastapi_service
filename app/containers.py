@@ -6,6 +6,7 @@ from google.cloud import firestore
 from .database import Database, init_redis_pool, init_firestore_client
 from .repositories import UserRepository, BitRepository, ComparisonBitRepository, ScoreRepository, PiNotationScoreRepository
 from .services import UserService, BitService, TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
+from .service.external_request_service import ExternalRequestService
 
 
 class Container(containers.DeclarativeContainer):

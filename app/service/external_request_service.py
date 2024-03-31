@@ -5,7 +5,7 @@ import logging
 
 
 
-class ExternalInfoService:
+class ExternalRequestService:
     async def fetch_current_bytes(self, url: str) -> Optional[bytes]:
         try:
             async with aiohttp.ClientSession() as session:
