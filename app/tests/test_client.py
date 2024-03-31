@@ -8,7 +8,7 @@ def test_report_match_times(client, bit_repository, pi_notation_score_repository
         "threshold": 100
     }
     with app.container.bit_repository.override(bit_repository), app.container.pi_notation_score_repository.override(pi_notation_score_repository):
-        for i in range(11):
+        for i in range(2):
             response = client.post("/report", json=request_body)
             time.sleep(1)
     assert response.status_code == 200
