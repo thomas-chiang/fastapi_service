@@ -1,12 +1,11 @@
-"""Containers module."""
-
 from dependency_injector import containers, providers
-from google.cloud import firestore
 
-from .database import Database, init_redis_pool, init_firestore_client
-from .repositories import UserRepository, BitRepository, ComparisonBitRepository, ScoreRepository, PiNotationScoreRepository
-from .services import UserService, BitService, TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
+from .database import init_redis_pool, init_firestore_client
+from .repositories import ComparisonBitRepository, ScoreRepository, PiNotationScoreRepository
+from .services import TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
 from .service.external_request_service import ExternalRequestService
+from .service.bit_service import BitService
+from .repository.bit_repository import BitRepository
 
 
 class Container(containers.DeclarativeContainer):
@@ -72,23 +71,6 @@ class Container(containers.DeclarativeContainer):
 
 
 
-
-
-
-
-
-
-    db = providers.Singleton(Database, db_url=config.db.url)
-
-    user_repository = providers.Factory(
-        UserRepository,
-        session_factory=db.provided.session,
-    )
-
-    user_service = providers.Factory(
-        UserService,
-        user_repository=user_repository,
-    )
 
     
 

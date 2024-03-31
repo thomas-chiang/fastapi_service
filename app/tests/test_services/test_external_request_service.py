@@ -4,7 +4,11 @@ from app.models import ReportInfo
 from aioresponses import aioresponses
 import logging
 
-@pytest.mark.asyncio(scope="session")
+@pytest.fixture(scope="module")
+def external_request_service():
+    return ExternalRequestService()
+
+@pytest.mark.asyncio(scope="module")
 async def test_fetch_current_bytes(external_request_service: ExternalRequestService, caplog):
     caplog.set_level(logging.NOTSET)
     fake_url = "http://fake_bytes.url"
@@ -17,7 +21,7 @@ async def test_fetch_current_bytes(external_request_service: ExternalRequestServ
         result = await external_request_service.fetch_current_bytes(fake_url)
         assert result == mock_response
 
-@pytest.mark.asyncio(scope="session")
+@pytest.mark.asyncio(scope="module")
 async def test_send_report(external_request_service: ExternalRequestService, caplog):
     caplog.set_level(logging.NOTSET)
     fake_url = "http://fake_report.url"

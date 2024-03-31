@@ -1,9 +1,38 @@
 from app.application import app
-import time
 from aioresponses import aioresponses
 from app.service.time_service import TimeService
 from unittest import mock
+import pytest
 
+import pytest
+from app.application import app
+from fastapi.testclient import TestClient
+from mockfirestore import AsyncMockFirestore
+from app.repositories import PiNotationScoreRepository
+from app.repository.bit_repository import BitRepository
+
+from fakeredis import FakeAsyncRedis
+
+@pytest.fixture(scope="module")
+def client():
+    with TestClient(app=app) as c:
+        yield c
+
+@pytest.fixture(scope="module")
+def redis():
+    return FakeAsyncRedis()
+
+@pytest.fixture(scope="module")
+def firestore_db():
+    return AsyncMockFirestore()
+
+@pytest.fixture(scope="module")
+def bit_repository(redis):
+    return BitRepository(redis = redis)
+
+@pytest.fixture(scope="module")
+def pi_notation_score_repository(firestore_db):
+    return PiNotationScoreRepository(firestore_db = firestore_db)
 
 def test_report_match_times(client, bit_repository, pi_notation_score_repository):
     fake_url = "http://fake.url"

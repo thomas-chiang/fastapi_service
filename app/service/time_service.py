@@ -1,4 +1,3 @@
-"""Services module."""
 import asyncio
 import time
 
