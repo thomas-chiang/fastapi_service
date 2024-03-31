@@ -137,7 +137,8 @@ async def report_match_times(
     current_bytes: bytes = await bit_service.get_current_bytes(request_body.url)
     current_bit: Bit = await bit_service.save_bit(current_bytes, current_timestamp, request_body.source)
     current_comparison_bit: Optional[Bit] = None
-    current_score: Optional[Score] = False
+    current_score: Optional[Score] = None
+    print(current_timestamp)
 
     await pi_notation_score_service.remove_expired_pi_notation_scores(request_body.source, previous_day_timestamp)
 
@@ -148,17 +149,17 @@ async def report_match_times(
 
     if current_comparison_bit and await comparison_bit_service.previous_bit_exists(current_comparison_bit):
         previous_comparison_bit: Bit = await comparison_bit_service.get_previous_bit(current_comparison_bit)
-        score_value: float = score_service.compute_score(current_comparison_bit, previous_comparison_bit)
-        current_score: Score = score_service.save_score(score_value, current_timestamp, request_body.source)
+        score_value: float = await score_service.compute_score(current_comparison_bit, previous_comparison_bit)
+        current_score: Score = await score_service.save_score(score_value, current_timestamp, request_body.source)
     
     if current_score and await score_service.previous_4_scores_exists(current_score):
         previous_n_scores: List[Score] = await score_service.get_previous_4_scores(current_score)
-        pi_notation_score_value: float = await pi_notation_score_service.compute_pi_notation_score(current_score+previous_n_scores)
+        pi_notation_score_value: float = await pi_notation_score_service.compute_pi_notation_score([current_score]+previous_n_scores)
         await pi_notation_score_service.save_score(pi_notation_score_value, current_timestamp, request_body.source)
     
     
     match_times = await pi_notation_score_service.get_match_times(request_body.threshold, request_body.source)
-            
+    print(match_times)  
 
     return ReportInfo(
         channel = request_body.source,

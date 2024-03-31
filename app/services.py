@@ -21,6 +21,7 @@ from .repositories import (
 
 
 def get_random_bytes_of_length_128() -> bytes:
+    return int(1).to_bytes(128, byteorder='big')
     return secrets.token_bytes(128)
 
 
