@@ -1,11 +1,13 @@
 from dependency_injector import containers, providers
 
 from .database import init_redis_pool, init_firestore_client
-from .repositories import ComparisonBitRepository, ScoreRepository, PiNotationScoreRepository
 from .services import TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
 from .service.external_request_service import ExternalRequestService
 from .service.bit_service import BitService
 from .repository.bit_repository import BitRepository
+from .repository.comparison_bit_repository import ComparisonBitRepository
+from .repository.score_repository import ScoreRepository
+from .repository.pi_notation_score_repository import PiNotationScoreRepository
 
 
 class Container(containers.DeclarativeContainer):

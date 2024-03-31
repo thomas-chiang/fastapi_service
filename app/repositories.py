@@ -11,7 +11,7 @@ from .models import Bit, Score
 
 from aioredis import Redis
 import asyncio
-
+from .repository import NotFoundError
 
 class BitRepository:
     expiration_seconds = 60 * 60 * 24 * 2  # 2 days
@@ -87,9 +87,5 @@ class PiNotationScoreRepository:
             .stream()
         ]
 
-
-class NotFoundError(Exception):
-    def __init__(self, entity_data):
-        super().__init__(f"entity not found, from {entity_data}")
 
 

@@ -13,10 +13,11 @@ from .models import Bit, Score
 from .repositories import (
     BitRepository,
     ComparisonBitRepository,
-    NotFoundError,
     ScoreRepository,
     PiNotationScoreRepository
 )
+
+from .repository import NotFoundError
 
 def get_current_timestamp() -> int:
     return round(time.time())
