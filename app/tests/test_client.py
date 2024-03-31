@@ -8,7 +8,7 @@ import pytest
 from app.application import app
 from fastapi.testclient import TestClient
 from mockfirestore import AsyncMockFirestore
-from app.repositories import PiNotationScoreRepository
+from app.repository.pi_notation_score_repository import PiNotationScoreRepository
 from app.repository.bit_repository import BitRepository
 
 from fakeredis import FakeAsyncRedis

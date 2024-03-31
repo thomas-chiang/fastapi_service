@@ -5,8 +5,12 @@ from typing import Optional, List
 
 
 from .container import Container
-from .services import BitService, TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
 from .service.external_request_service import ExternalRequestService
+from .service.bit_service import BitService
+from .service.time_service import TimeService
+from .service.comparison_bit_service import ComparisonBitService
+from .service.score_service import ScoreService
+from .service.pi_notation_score_service import PiNotationScoreService
 from .models import ReportRequestBody, ReportInfo, Bit, Score
 
 import asyncio
