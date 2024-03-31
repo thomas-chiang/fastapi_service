@@ -1,10 +1,11 @@
 """Containers module."""
 
 from dependency_injector import containers, providers
+from google.cloud import firestore
 
-from .database import Database, init_redis_pool
-from .repositories import UserRepository, BitRepository, ComparisonBitRepository, ScoreRepository
-from .services import UserService, BitService, TimeService, ComparisonBitService, ScoreService
+from .database import Database, init_redis_pool, init_firestore_client
+from .repositories import UserRepository, BitRepository, ComparisonBitRepository, ScoreRepository, PiNotationScoreRepository
+from .services import UserService, BitService, TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
 
 
 class Container(containers.DeclarativeContainer):
@@ -17,6 +18,11 @@ class Container(containers.DeclarativeContainer):
         init_redis_pool,
         host=config.redis_host,
         password=config.redis_password,
+    )
+
+    firestore_db = providers.Singleton(
+        init_firestore_client,
+        project_id=config.project_id,
     )
 
     bit_repository = providers.Factory(
@@ -34,6 +40,13 @@ class Container(containers.DeclarativeContainer):
         redis=redis_pool
     )
 
+    pi_notation_score_repository = providers.Factory(
+        PiNotationScoreRepository,
+        firestore_db=firestore_db
+    )
+
+    time_service = providers.Factory(TimeService)
+
     bit_service = providers.Factory(
         BitService,
         bit_repository=bit_repository
@@ -48,6 +61,16 @@ class Container(containers.DeclarativeContainer):
         ScoreService,
         score_repository=score_repository
     )
+
+    pi_notation_score_service = providers.Factory(
+        PiNotationScoreService,
+        pi_notation_score_repository=pi_notation_score_repository
+    )
+
+
+
+
+
 
 
 
@@ -66,4 +89,4 @@ class Container(containers.DeclarativeContainer):
 
     
 
-    time_service = providers.Factory(TimeService)
+    

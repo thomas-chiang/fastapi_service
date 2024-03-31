@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 
 # import sys
-# from google.cloud import firestore
+from google.cloud import firestore
 # from mockfirestore import MockFirestore  # Assuming this module exists
 
 
@@ -23,6 +23,9 @@ async def init_redis_pool(host: str, password: str) -> AsyncIterator[Redis]:
     yield session
     session.close()
     await session.wait_closed()
+
+def init_firestore_client(project_id: str) -> firestore.AsyncClient:
+    return firestore.AsyncClient(project_id)
 
 
 

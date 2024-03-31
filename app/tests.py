@@ -1,15 +1,16 @@
 """Tests module."""
-
+import asyncio
 from unittest import mock
 
 import pytest
 from fastapi.testclient import TestClient
+from mockfirestore import AsyncMockFirestore
 
 from .models import User, Bit, Score
 from .application import app
-from .services import BitService, TimeService, get_random_bytes_of_length_128, ComparisonBitService, ScoreService, MatchService
-from .repositories import UserRepository, UserNotFoundError, BitRepository, ComparisonBitRepository, NotFoundError, ScoreRepository, MatchRepository
-
+from .services import BitService, TimeService, get_random_bytes_of_length_128, ComparisonBitService, ScoreService, PiNotationScoreService
+from .repositories import UserRepository, UserNotFoundError, BitRepository, ComparisonBitRepository, NotFoundError, ScoreRepository, PiNotationScoreRepository
+from unittest import mock
 
 from fakeredis import FakeAsyncRedis
 
@@ -26,6 +27,10 @@ def redis():
     return FakeAsyncRedis()
 
 @pytest.fixture
+def firestore_db():
+    return AsyncMockFirestore()
+
+@pytest.fixture
 def bit_repository(redis):
     return BitRepository(redis = redis)
 
@@ -38,8 +43,8 @@ def score_repository(redis):
     return ScoreRepository(redis = redis)
 
 @pytest.fixture
-def match_repository(redis):
-    return MatchRepository(redis = redis)
+def pi_notation_score_repository(firestore_db):
+    return PiNotationScoreRepository(firestore_db = firestore_db)
 
 @pytest.fixture
 def bit_service(bit_repository):
@@ -54,16 +59,17 @@ def score_service(score_repository):
     return ScoreService(score_repository=score_repository)
 
 @pytest.fixture
-def match_service(match_repository):
-    return MatchService(match_repository=match_repository)
+def pi_notation_score_service(pi_notation_score_repository):
+    return PiNotationScoreService(pi_notation_score_repository=pi_notation_score_repository)
 
 
-def test_report_match_times(client: TestClient, bit_repository: BitRepository):
+def test_report_match_times(client: TestClient, bit_repository: BitRepository, pi_notation_score_repository: PiNotationScoreRepository):
     request_body = {
         "source": "sample_channel",
-        "url": "url_for_random_bytes"
+        "url": "url_for_random_bytes",
+        "threshold": 100
     }
-    with app.container.bit_repository.override(bit_repository):
+    with app.container.bit_repository.override(bit_repository), app.container.pi_notation_score_repository.override(pi_notation_score_repository):
         response = client.post("/report", json=request_body)
     assert response.status_code == 200
     data = response.json()
@@ -77,6 +83,7 @@ def test_report_match_times(client: TestClient, bit_repository: BitRepository):
 async def test_time_service(time_service: TimeService):
     current_timestamp = await time_service.get_current_timestamp()
     assert isinstance(current_timestamp, int)
+    assert current_timestamp - 60*60*24 == await time_service.get_previous_day_timestamp()
 
 
 @pytest.mark.asyncio
@@ -100,10 +107,25 @@ async def test_score_repository(score_repository: ScoreRepository):
     assert the_score == await score_repository.get_score_by_timestamp_and_source(1, "test_score_repository")
 
 @pytest.mark.asyncio
-async def test_match_repository(match_repository: MatchRepository):
-    the_score = Score(score=1, timestamp=1, source="test_match_repository")
-    await match_repository.add(the_score)
-    assert the_score == await match_repository.get_score_by_timestamp_and_source(1, "test_match_repository")
+async def test_pi_notation_score_repository(pi_notation_score_repository: PiNotationScoreRepository, firestore_db: AsyncMockFirestore):
+    the_score = Score(score=1, timestamp=10, source="test_pi_notation_score_repository")
+    await pi_notation_score_repository.add(the_score)
+    doc_snapshot = await firestore_db.collection(the_score.source).document(str(the_score.timestamp)).get()
+    assert doc_snapshot.to_dict() == the_score.model_dump()
+
+    await asyncio.gather(
+        *(pi_notation_score_repository.add(Score(score=10, timestamp=timestamp, source=the_score.source)) for timestamp in range(1, 6))
+    )
+    the_threshold = 5
+    limit = 3
+    matched_scores = await pi_notation_score_repository.get_scores_larger_than_threshold(5, the_score.source, limit)
+    assert len(matched_scores) <= limit
+    assert all(score.score > the_threshold for score in matched_scores)
+
+    assert len([ss async for ss in firestore_db.collection(the_score.source).stream()]) == 6
+    await pi_notation_score_repository.delete_scores_before_timestamp(the_score.source, 5)
+    assert len([ss async for ss in firestore_db.collection(the_score.source).stream()]) == 1
+
 
 
 @pytest.mark.asyncio
@@ -157,7 +179,7 @@ async def test_comparison_bit_service(comparison_bit_service: ComparisonBitServi
 
 
 @pytest.mark.asyncio
-async def test_score_service(score_service: ScoreService, redis: FakeAsyncRedis):
+async def test_score_service(score_service: ScoreService):
     the_bit = Bit(bytes=get_random_bytes_of_length_128(), timestamp=1, source="test_score_service")
     assert await score_service.compute_score(the_bit, the_bit) == sum(((1024-i)/1024 for i in range(768)))
     the_score = await score_service.save_score(1, 5, "test_score_service")
@@ -173,13 +195,24 @@ async def test_score_service(score_service: ScoreService, redis: FakeAsyncRedis)
     assert the_previous_score2 in previous_n_scores
     assert the_previous_score3 in previous_n_scores
     assert the_previous_score4 in previous_n_scores
-    keys = await redis.keys("*")
-    print(keys)
+
 
 
 @pytest.mark.asyncio
-async def test_match_service(match_service: MatchService, redis: FakeAsyncRedis):
-    pass
+async def test_pi_notation_score_service(pi_notation_score_service: PiNotationScoreService):
+    the_scores = [Score(score=2, timestamp=1, source="test_pi_notation_score_repository") for _ in range(5)]
+    assert 32 == await pi_notation_score_service.compute_pi_notation_score(the_scores)
+
+    match_time1 = 5
+    match_time2 = 10
+    repository_mock = mock.Mock(spec=PiNotationScoreRepository)
+    repository_mock.get_scores_larger_than_threshold.return_value = [
+        Score(score=3, timestamp=match_time1, source="test_pi_notation_score_service"),
+        Score(score=2, timestamp=match_time2, source="test_pi_notation_score_service")
+    ]
+    assert [match_time1, match_time2] == await PiNotationScoreService(repository_mock).get_match_times(1, "test_pi_notation_score_service")
+
+
 
 
 

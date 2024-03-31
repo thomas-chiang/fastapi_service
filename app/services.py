@@ -16,7 +16,7 @@ from .repositories import (
     NotFoundError,
     ScoreRepository,
     UserRepository,
-    MatchRepository
+    PiNotationScoreRepository
 )
 
 
@@ -46,18 +46,26 @@ def compute_score(current: bitarray, previous: bitarray, first_n: int, total_n: 
         score += (1024 - i) / 1024 * (current[i + first_n] == previous[i + first_n])
     return score
 
+def compute_pi_notation_score(scores: List[Score]) -> float:
+        the_value = 1
+        for score in scores:
+            the_value *= score.score
 
-class BiteLengthError(ValueError):
-    entity_name: str
+        return the_value
 
-    def __init__(self, entity_data):
-        super().__init__(f"entity not found, from {entity_data}")
 
 
 class TimeService:
-    @staticmethod
-    async def get_current_timestamp() -> int:
-        return int(await asyncio.to_thread(time.time))
+    timestamp_interval = 60 * 60 * 24  # seconds of one day
+
+    def __init__(self) -> None:
+        self.current_timestamp = round(time.time())
+        
+    async def get_current_timestamp(self) -> int:
+        return self.current_timestamp
+    
+    async def get_previous_day_timestamp(self) -> int:
+        return self.current_timestamp - self.timestamp_interval
 
 
 class BitService:
@@ -115,13 +123,7 @@ class ScoreService:
     previous_n = 4 # previous number of score to be consider
     threshold = 30
 
-    @staticmethod
-    def is_pi_scores_match_threshold(scores: List[Score], threshold: float):
-        the_value = 1
-        for score in scores:
-            the_value *= score.score
 
-        return True if the_value > threshold else False
 
     @staticmethod
     async def compute_score(current_bit: Bit, previous_bit: Bit) -> float:
@@ -164,15 +166,28 @@ class ScoreService:
         )))
 
 
-class MatchService:    
-    def __init__(self, match_repository: MatchRepository) -> None:
-        self._repository: MatchRepository = match_repository
+class PiNotationScoreService:
+    match_times_length = 10
+
+    @staticmethod
+    async def compute_pi_notation_score(scores: List[Score]) -> float:
+        return await asyncio.to_thread(compute_pi_notation_score, scores)
+
+
+    def __init__(self, pi_notation_score_repository: PiNotationScoreRepository) -> None:
+        self._repository: PiNotationScoreRepository = pi_notation_score_repository
 
     async def save_score(self, score: float, timestamp: int, source: str) -> Score:
         the_score = Score(score=score, timestamp=timestamp, source=source)
         await self._repository.add(the_score)
         return the_score
+    
+    async def remove_expired_pi_notation_scores(self, source: str, previous_day_timestamp: int) -> None:
+        await self._repository.delete_scores_before_timestamp(source, previous_day_timestamp)
 
+    async def get_match_times(self, threshold: float, source: int) -> List[int]:
+        match_scores: List[Score] = await self._repository.get_scores_larger_than_threshold(threshold, source, self.match_times_length)
+        return [match_score.timestamp for match_score in match_scores]
 
 
 

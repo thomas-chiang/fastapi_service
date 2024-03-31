@@ -7,11 +7,13 @@ services:
     environment:
       REDIS_HOST: "redis"
       REDIS_PASSWORD: "password"
+      FIRESTORE_EMULATOR_HOST: firestore_emulator:8200
+      FIRESTORE_PROJECT_ID: dummy-project-id
     ports:
       - "8000:8000"
     volumes:
       - "./:/code"
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.application:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - "redis"
       - firestore_emulator

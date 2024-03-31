@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 class ReportRequestBody(BaseModel):
     source: str
     url: str
+    threshold: float
 
 
 class ReportInfo(BaseModel):
