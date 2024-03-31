@@ -1,8 +1,6 @@
 from app.service.comparison_bit_service import ComparisonBitService
 import pytest
-from app.service.bit_service import BitService
 from app.models import Bit
-from app.repository import NotFoundError
 from app.repository.comparison_bit_repository import ComparisonBitRepository
 from fakeredis import FakeAsyncRedis
 

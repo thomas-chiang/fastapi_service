@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 
-from .containers import Container
+from .container import Container
 from .endpoints import router
 
 

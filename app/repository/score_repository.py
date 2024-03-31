@@ -3,7 +3,7 @@ from . import NotFoundError
 from aioredis import Redis
 
 class ScoreRepository:
-    expiration_seconds = 60 * 60 * 24 * 2  # 2 days
+    expiration_seconds = 60  # can be 10, but 60 seconds for buffer
     entity_name = "Score"
 
     def __init__(self, redis: Redis) -> None:

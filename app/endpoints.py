@@ -4,7 +4,7 @@ from dependency_injector.wiring import inject, Provide
 from typing import Optional, List
 
 
-from .containers import Container
+from .container import Container
 from .services import BitService, TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
 from .service.external_request_service import ExternalRequestService
 from .models import ReportRequestBody, ReportInfo, Bit, Score

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from httpx import AsyncClient
 
-from app import app, container, Service
+from app import app, Service, container
 import pytest_asyncio
 
 @pytest_asyncio.fixture

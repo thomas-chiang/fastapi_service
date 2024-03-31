@@ -1,9 +1,12 @@
 from dependency_injector import containers, providers
 
 from .database import init_redis_pool, init_firestore_client
-from .services import TimeService, ComparisonBitService, ScoreService, PiNotationScoreService
+from .services import PiNotationScoreService
 from .service.external_request_service import ExternalRequestService
+from .service.time_service import TimeService
 from .service.bit_service import BitService
+from .service.comparison_bit_service import ComparisonBitService
+from .service.score_service import ScoreService
 from .repository.bit_repository import BitRepository
 from .repository.comparison_bit_repository import ComparisonBitRepository
 from .repository.score_repository import ScoreRepository
