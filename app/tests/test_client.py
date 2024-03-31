@@ -34,7 +34,7 @@ def bit_repository(redis):
 def pi_notation_score_repository(firestore_db):
     return PiNotationScoreRepository(firestore_db = firestore_db)
 
-def test_report_match_times(client, bit_repository, pi_notation_score_repository):
+def test_report_match_times(client, bit_repository, pi_notation_score_repository, redis):
     fake_url = "http://fake.url"
     fake_report_url = "http://fake_report.url"
     request_body = {"source": "sample_channel", "url": fake_url, "threshold": 100, "report_url": fake_report_url}
@@ -46,6 +46,7 @@ def test_report_match_times(client, bit_repository, pi_notation_score_repository
     mock_previous_day_times = [0]* len(mock_curr_times)
 
     with (
+        app.container.redis_pool.override(redis),
         app.container.bit_repository.override(bit_repository), 
         app.container.pi_notation_score_repository.override(pi_notation_score_repository),
     ):
