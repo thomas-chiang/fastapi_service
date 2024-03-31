@@ -2,7 +2,7 @@ import asyncio
 from contextlib import ExitStack
 
 import pytest
-from .application import app as actual_app
+from .application import app 
 from fastapi.testclient import TestClient
 from mockfirestore import AsyncMockFirestore
 
@@ -20,7 +20,7 @@ import time
 
 @pytest.fixture
 def client():
-    with TestClient(actual_app) as c:
+    with TestClient(app) as c:
         yield c
 
 
@@ -57,7 +57,7 @@ def test_report_match_times(client, bit_repository, pi_notation_score_repository
         "url": "url_for_random_bytes",
         "threshold": 100
     }
-    with actual_app.container.bit_repository.override(bit_repository), actual_app.container.pi_notation_score_repository.override(pi_notation_score_repository):
+    with app.container.bit_repository.override(bit_repository), app.container.pi_notation_score_repository.override(pi_notation_score_repository):
         for i in range(11):
             response = client.post("/report", json=request_body)
             time.sleep(1)
