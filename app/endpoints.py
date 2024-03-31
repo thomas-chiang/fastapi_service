@@ -49,7 +49,6 @@ async def report_match_times(
     )
 
     match_times = await pi_notation_score_service.get_match_times(request_body.threshold, request_body.source)
-    print(match_times)
     report_info = ReportInfo(channel = request_body.source,time = current_timestamp,match_times= match_times)
     await external_request_service.send_report(request_body.report_url, report_info)
 
