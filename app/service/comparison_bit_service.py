@@ -1,5 +1,7 @@
 import asyncio
+
 from bitarray import bitarray
+
 from ..models import Bit
 from ..repository.comparison_bit_repository import ComparisonBitRepository
 from .bit_service import BitService
@@ -15,6 +17,7 @@ def xor_bytes(byte1: bytes, byte2: bytes) -> bytes:
     bit_array1 = bytes_to_bitarray(byte1)
     bit_array2 = bytes_to_bitarray(byte2)
     return (bit_array1 ^ bit_array2).tobytes()
+
 
 class ComparisonBitService(BitService):
     timestamp_interval = 60 * 60 * 24  # total seconds of one day

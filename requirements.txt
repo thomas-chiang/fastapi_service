@@ -1,10 +1,8 @@
 dependency-injector
+pyyaml
 fastapi
 uvicorn
-pyyaml
 
-
-sqlalchemy
 pytest
 requests
 pytest-cov
@@ -19,3 +17,4 @@ aiohttp
 google-cloud-firestore
 mock-firestore-async
 aioresponses
+ruff

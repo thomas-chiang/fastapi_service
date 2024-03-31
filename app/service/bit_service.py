@@ -2,6 +2,7 @@ from ..models import Bit
 from ..repository import NotFoundError
 from ..repository.bit_repository import BitRepository
 
+
 class BitService:
     timestamp_interval = 1  # one second
     byte_length = 1024 / 8

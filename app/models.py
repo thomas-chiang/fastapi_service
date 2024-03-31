@@ -1,7 +1,9 @@
 """Models module."""
 
-from pydantic import BaseModel
 from typing import List
+
+from pydantic import BaseModel
+
 
 class ReportRequestBody(BaseModel):
     source: str
@@ -26,5 +28,3 @@ class Score(BaseModel):
     score: float
     timestamp: int
     source: str
-
-

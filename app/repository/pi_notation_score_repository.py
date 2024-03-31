@@ -1,7 +1,10 @@
-from google.cloud import firestore
-from ..models import Score
 import asyncio
 from typing import List
+
+from google.cloud import firestore
+
+from ..models import Score
+
 
 class PiNotationScoreRepository:
     expiration_seconds = 60 * 60 * 24  # 1 days

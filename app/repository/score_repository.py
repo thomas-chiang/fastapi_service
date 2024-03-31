@@ -1,6 +1,8 @@
+from aioredis import Redis
+
 from ..models import Score
 from . import NotFoundError
-from aioredis import Redis
+
 
 class ScoreRepository:
     expiration_seconds = 60  # can be 10, but 60 seconds for buffer
@@ -16,6 +18,6 @@ class ScoreRepository:
 
     async def get_score_by_timestamp_and_source(self, timestamp: int, source: str) -> Score:
         the_score = await self._redis.get(self.entity_name + str(timestamp) + source)
-        if the_score == None:
+        if the_score is None:
             raise NotFoundError({"entity_name": self.entity_name, "timestamp": timestamp, "source": source})
         return Score(score=the_score, source=source, timestamp=timestamp)

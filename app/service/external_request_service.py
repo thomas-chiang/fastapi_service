@@ -1,8 +1,9 @@
-import aiohttp
-from typing import Optional
-from ..models import ReportInfo
 import logging
+from typing import Optional
 
+import aiohttp
+
+from ..models import ReportInfo
 
 
 class ExternalRequestService:

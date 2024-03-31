@@ -1,20 +1,19 @@
 from dependency_injector import containers, providers
 
-from .database import init_redis_pool, init_firestore_client
-from .service.external_request_service import ExternalRequestService
-from .service.time_service import TimeService
-from .service.bit_service import BitService
-from .service.comparison_bit_service import ComparisonBitService
-from .service.score_service import ScoreService
-from .service.pi_notation_score_service import PiNotationScoreService
+from .database import init_firestore_client, init_redis_pool
 from .repository.bit_repository import BitRepository
 from .repository.comparison_bit_repository import ComparisonBitRepository
-from .repository.score_repository import ScoreRepository
 from .repository.pi_notation_score_repository import PiNotationScoreRepository
+from .repository.score_repository import ScoreRepository
+from .service.bit_service import BitService
+from .service.comparison_bit_service import ComparisonBitService
+from .service.external_request_service import ExternalRequestService
+from .service.pi_notation_score_service import PiNotationScoreService
+from .service.score_service import ScoreService
+from .service.time_service import TimeService
 
 
 class Container(containers.DeclarativeContainer):
-
     wiring_config = containers.WiringConfiguration(modules=[".endpoints"])
 
     config = providers.Configuration(yaml_files=["config.yml"])
@@ -30,53 +29,26 @@ class Container(containers.DeclarativeContainer):
         project_id=config.project_id,
     )
 
-    bit_repository = providers.Factory(
-        BitRepository,
-        redis=redis_pool
-    )
+    bit_repository = providers.Factory(BitRepository, redis=redis_pool)
 
-    comparison_bit_repository = providers.Factory(
-        ComparisonBitRepository,
-        redis=redis_pool
-    )
-    
-    score_repository = providers.Factory(
-        ScoreRepository,
-        redis=redis_pool
-    )
+    comparison_bit_repository = providers.Factory(ComparisonBitRepository, redis=redis_pool)
 
-    pi_notation_score_repository = providers.Factory(
-        PiNotationScoreRepository,
-        firestore_db=firestore_db
-    )
+    score_repository = providers.Factory(ScoreRepository, redis=redis_pool)
+
+    pi_notation_score_repository = providers.Factory(PiNotationScoreRepository, firestore_db=firestore_db)
 
     time_service = providers.Factory(TimeService)
 
     external_request_service = providers.Factory(ExternalRequestService)
 
-    bit_service = providers.Factory(
-        BitService,
-        bit_repository=bit_repository
-    )
+    bit_service = providers.Factory(BitService, bit_repository=bit_repository)
 
     comparison_bit_service = providers.Factory(
-        ComparisonBitService,
-        comparison_bit_repository=comparison_bit_repository
+        ComparisonBitService, comparison_bit_repository=comparison_bit_repository
     )
 
-    score_service = providers.Factory(
-        ScoreService,
-        score_repository=score_repository
-    )
+    score_service = providers.Factory(ScoreService, score_repository=score_repository)
 
     pi_notation_score_service = providers.Factory(
-        PiNotationScoreService,
-        pi_notation_score_repository=pi_notation_score_repository
+        PiNotationScoreService, pi_notation_score_repository=pi_notation_score_repository
     )
-
-
-
-
-    
-
-    
