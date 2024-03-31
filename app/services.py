@@ -19,6 +19,9 @@ from .repositories import (
     PiNotationScoreRepository
 )
 
+def get_current_timestamp() -> int:
+    return round(time.time())
+
 
 def get_random_bytes_of_length_128() -> bytes:
     return int(1).to_bytes(128, byteorder='big')
@@ -58,15 +61,12 @@ def compute_pi_notation_score(scores: List[Score]) -> float:
 
 class TimeService:
     timestamp_interval = 60 * 60 * 24  # seconds of one day
-
-    def __init__(self) -> None:
-        self.current_timestamp = round(time.time())
         
     async def get_current_timestamp(self) -> int:
-        return self.current_timestamp
+        return await asyncio.to_thread(get_current_timestamp)
     
     async def get_previous_day_timestamp(self) -> int:
-        return self.current_timestamp - self.timestamp_interval
+        return await self.get_current_timestamp() - self.timestamp_interval
 
 
 class BitService:
@@ -107,7 +107,7 @@ class BitService:
 
 
 class ComparisonBitService(BitService):
-    timestamp_interval = 60 * 60 * 24  # total seconds of one day
+    timestamp_interval = 1 #60 * 60 * 24  # total seconds of one day
 
     @staticmethod
     async def compute_comparison_value(current_bit: Bit, previous_bit: Bit) -> bytes:

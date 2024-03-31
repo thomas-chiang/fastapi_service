@@ -138,7 +138,6 @@ async def report_match_times(
     current_bit: Bit = await bit_service.save_bit(current_bytes, current_timestamp, request_body.source)
     current_comparison_bit: Optional[Bit] = None
     current_score: Optional[Score] = None
-    print(current_timestamp)
 
     await pi_notation_score_service.remove_expired_pi_notation_scores(request_body.source, previous_day_timestamp)
 

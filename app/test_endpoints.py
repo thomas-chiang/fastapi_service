@@ -12,15 +12,15 @@ from fakeredis import FakeAsyncRedis
 import time
 
 
-@pytest.fixture(autouse=True)
-def app():
-    with ExitStack():
-        yield actual_app
+# @pytest.fixture(autouse=True)
+# def app():
+#     with ExitStack():
+#         yield actual_app
 
 
 @pytest.fixture
-def client(app):
-    with TestClient(app) as c:
+def client():
+    with TestClient(actual_app) as c:
         yield c
 
 

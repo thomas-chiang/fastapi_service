@@ -67,7 +67,7 @@ To run the tests do:
 
 .. code-block:: bash
 
-   docker-compose run --rm webapp py.test webapp/tests.py --cov=webapp
+   docker-compose run --rm app py.test app/tests.py --cov=app
 
 The output should be something like:
 
