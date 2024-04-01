@@ -5,7 +5,7 @@ A server receiving post requests to
 3. Send POST requests to the reporting url regarding the processed information
 
 ## Usage
-send a POST request to the `/report` endpoint with the following request body:
+Send POST requests(Scheduler) to the `/report` endpoint with the following request body:
 
 ```json
 {
