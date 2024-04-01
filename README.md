@@ -22,6 +22,7 @@ send a POST request to the `/report` endpoint with the following request body:
 
 ## System Diagram
 
+![image](https://github.com/thomas-chiang/fastapi_service/assets/84237929/f30d0ffe-1465-49d6-9398-f1023f5c0df7)
 
 
 ## Getting Started
