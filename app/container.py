@@ -7,7 +7,7 @@ from .repository.pi_notation_score_repository import PiNotationScoreRepository
 from .repository.score_repository import ScoreRepository
 from .service.bit_service import BitService
 from .service.comparison_bit_service import ComparisonBitService
-from .service.external_request_service import ExternalRequestService
+from .service.egress_request_service import EgressRequestService
 from .service.pi_notation_score_service import PiNotationScoreService
 from .service.score_service import ScoreService
 from .service.time_service import TimeService
@@ -39,7 +39,7 @@ class Container(containers.DeclarativeContainer):
 
     time_service = providers.Factory(TimeService)
 
-    external_request_service = providers.Factory(ExternalRequestService)
+    egress_request_service = providers.Factory(EgressRequestService)
 
     bit_service = providers.Factory(BitService, bit_repository=bit_repository)
 

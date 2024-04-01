@@ -10,7 +10,7 @@ from .container import Container
 from .models import Bit, ReportInfo, ReportRequestBody, Score
 from .service.bit_service import BitService
 from .service.comparison_bit_service import ComparisonBitService
-from .service.external_request_service import ExternalRequestService
+from .service.egress_request_service import EgressRequestService
 from .service.pi_notation_score_service import PiNotationScoreService
 from .service.score_service import ScoreService
 from .service.time_service import TimeService
@@ -23,7 +23,7 @@ router = APIRouter()
 async def report_match_times(
     request_body: ReportRequestBody,
     time_service: TimeService = Depends(Provide[Container.time_service]),
-    external_request_service: ExternalRequestService = Depends(Provide[Container.external_request_service]),
+    egress_request_service: EgressRequestService = Depends(Provide[Container.egress_request_service]),
     bit_service: BitService = Depends(Provide[Container.bit_service]),
     comparison_bit_service: ComparisonBitService = Depends(Provide[Container.comparison_bit_service]),
     score_service: ScoreService = Depends(Provide[Container.score_service]),
@@ -40,7 +40,7 @@ async def report_match_times(
         handle_bits_and_scores(
             current_timestamp=current_timestamp,
             request_body=request_body,
-            external_request_service=external_request_service,
+            egress_request_service=egress_request_service,
             bit_service=bit_service,
             comparison_bit_service=comparison_bit_service,
             score_service=score_service,
@@ -50,7 +50,7 @@ async def report_match_times(
 
     match_times = await pi_notation_score_service.get_match_times(request_body.threshold, request_body.source)
     report_info = ReportInfo(channel=request_body.source, time=current_timestamp, match_times=match_times)
-    await external_request_service.send_report(request_body.report_url, report_info)
+    await egress_request_service.send_report(request_body.report_url, report_info)
 
     return report_info
 
@@ -58,7 +58,7 @@ async def report_match_times(
 async def handle_bits_and_scores(
     current_timestamp: int,
     request_body: ReportRequestBody,
-    external_request_service: ExternalRequestService,
+    egress_request_service: EgressRequestService,
     bit_service: BitService,
     comparison_bit_service: ComparisonBitService,
     score_service: ScoreService,
@@ -67,7 +67,7 @@ async def handle_bits_and_scores(
     current_bit: Optional[Bit] = None
     current_comparison_bit: Optional[Bit] = None
     current_score: Optional[Score] = None
-    current_bytes_value: Optional[bytes] = await external_request_service.fetch_current_bytes(request_body.url)
+    current_bytes_value: Optional[bytes] = await egress_request_service.fetch_current_bytes(request_body.url)
     if current_bytes_value:
         current_bit: Bit = await bit_service.save_bit(current_bytes_value, current_timestamp, request_body.source)
 

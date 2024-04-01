@@ -6,7 +6,7 @@ import aiohttp
 from ..models import ReportInfo
 
 
-class ExternalRequestService:
+class EgressRequestService:
     async def fetch_current_bytes(self, url: str) -> Optional[bytes]:
         try:
             async with aiohttp.ClientSession() as session:
