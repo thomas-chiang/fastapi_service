@@ -37,7 +37,7 @@ async def report_match_times(
 
     await asyncio.gather(
         pi_notation_score_service.remove_expired_pi_notation_scores(request_body.source, previous_day_timestamp),
-        handle_bits_and_scores(
+        process_bits_and_scores(
             current_timestamp=current_timestamp,
             request_body=request_body,
             egress_request_service=egress_request_service,
@@ -50,12 +50,12 @@ async def report_match_times(
 
     match_times = await pi_notation_score_service.get_match_times(request_body.threshold, request_body.source)
     report_info = ReportInfo(channel=request_body.source, time=current_timestamp, match_times=match_times)
-    await egress_request_service.send_report(request_body.report_url, report_info)
+    await egress_request_service.send_report(request_body.reporting_url, report_info)
 
     return report_info
 
 
-async def handle_bits_and_scores(
+async def process_bits_and_scores(
     current_timestamp: int,
     request_body: ReportRequestBody,
     egress_request_service: EgressRequestService,
@@ -67,7 +67,7 @@ async def handle_bits_and_scores(
     current_bit: Optional[Bit] = None
     current_comparison_bit: Optional[Bit] = None
     current_score: Optional[Score] = None
-    current_bytes_value: Optional[bytes] = await egress_request_service.fetch_current_bytes(request_body.url)
+    current_bytes_value: Optional[bytes] = await egress_request_service.fetch_current_bytes(request_body.source_url)
     if current_bytes_value:
         current_bit: Bit = await bit_service.save_bit(current_bytes_value, current_timestamp, request_body.source)
 

@@ -41,7 +41,7 @@ def pi_notation_score_repository(firestore_db):
 def test_report_match_times(client, bit_repository, pi_notation_score_repository, redis):
     fake_url = "http://fake.url"
     fake_report_url = "http://fake_report.url"
-    request_body = {"source": "sample_channel", "url": fake_url, "threshold": 100, "report_url": fake_report_url}
+    request_body = {"source": "sample_channel", "source_url": fake_url, "threshold": 100, "reporting_url": fake_report_url}
 
     time_service_mock = mock.Mock(spec=TimeService)
     mock_day1_curr_times = [i for i in range(1, 11)]

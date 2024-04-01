@@ -7,9 +7,9 @@ from pydantic import BaseModel
 
 class ReportRequestBody(BaseModel):
     source: str
-    url: str
+    source_url: str
     threshold: float
-    report_url: str
+    reporting_url: str
 
 
 class ReportInfo(BaseModel):
