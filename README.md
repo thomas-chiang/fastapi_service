@@ -41,3 +41,10 @@ To run unit test:
 ```
 docker-compose run --rm app py.test app/tests --cov=app
 ```
+or
+```
+pip install -r requirements.txt
+```
+```
+pytest app/tests --cov
+```
