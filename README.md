@@ -40,11 +40,6 @@ times are UNIX timestamps (integer) and the channel is a string to identify the 
 
 The team would like only the top 10 matches, based on score, if more than 10 occur for a given time. 
 
-## Breakdown 
-A server receiving post requests to  
-1. Send GET requests to the source url to retrieve the byte data 
-2. Process the byte data by manipulating with historical information
-3. Send POST requests to the reporting url regarding the processed information
 
 ## **Solution**
 
