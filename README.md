@@ -21,7 +21,6 @@ A match is then given by comparing the 5 scores going back in time, according to
 
 $$
 S_{t,d} = \prod_{i=0}^{4}s_{t-i,d-i} > T
-
 $$
 
 where $T$ is some threshold float value, which we can adjust. 
@@ -30,9 +29,9 @@ The requirement is to report the times which match to another service, which is 
 
 ```json
 {
-  channel: "",
-  time: 0,
-  match_times: [0]
+  "channel": "",
+  "time": 0,
+  "match_times": [0]
 }
 ```
 
